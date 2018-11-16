@@ -6,18 +6,18 @@ var particles = new Array(0);
 var mDownPrevious = false;
 var mouseVelX = 0;
 var mouseVely = 0;
-//var cloudImage;
+var cloudImage;
 
 const mouseSmoothing = 5;
 const gravityUp = -8;
-const gravityDown = -15;
+const gravityDown = -16;
 const framerate = 60;
 const width = 800;
 const height = 600;
 const nullNormal = new Position(0, 0);
 
 function preload() {
-    var cloudImage = loadImage("https://raw.githubusercontent.com/Julian-Wyatt/ComputingContributions/master/src/images/IoT2.jpg");
+    cloudImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/CloudFaded.png");
 }
 
 function setup() {
@@ -39,7 +39,7 @@ function draw() {
     while (i < projectileCount){
         projectiles[i].MakeMove();
         projectiles[i].Render();
-        if (projectiles[i].deadNormal == nullNormal) {
+        if (projectiles[i].deadNormal === nullNormal) {
             i += 1;
         }
         else {
@@ -90,16 +90,25 @@ function draw() {
     }
 
 
-
 }
 
 function DeleteProjectile(index) {
     var deleted = projectiles.splice(index, 1);    
     particles.push(new BangParticle(deleted[0].x, deleted[0].y, deleted[0].deadNormal));
 
+    for (var i = 0; i < 25; i++) {
+        particles.push(new SmokeParticle(deleted[0].x, deleted[0].y, deleted[0].deadNormal));
+    }
+    for (var i = 0; i < 7; i++) {
+        particles.push(new DebrisParticle(deleted[0].x, deleted[0].y, deleted[0].deadNormal));
+    }
+    
+    
+  
 }
 function DeleteParticle(index) {
     particles.splice(index, 1);
+    //console.log("Particle count = " + particles.length);
 }
 
 function AddPosition(xIn, yIn) {
@@ -134,7 +143,7 @@ function Projectile(xIn, yIn, xVelIn, yVelIn) {
     this.deadNormal = nullNormal;
 }
 Projectile.prototype.MakeMove = function () {
-    if (this.deadNormal == nullNormal) {
+    if (this.deadNormal === nullNormal) {
         this.x += this.xVel;
         this.y += this.yVel;
 
@@ -197,7 +206,7 @@ BangParticle.prototype.MakeMove = function () {
 }
 BangParticle.prototype.Render = function () {
     if (!this.dead) {
-        stroke(color(0,0,0,this.alpha*255));        
+        stroke(color(0,0,0,this.alpha*255));
         strokeWeight(this.thickness);
         noFill();
         ellipse(Math.floor(this.x), height - Math.floor(this.y), this.radius, this.radius);        
@@ -207,22 +216,109 @@ BangParticle.prototype.Render = function () {
 function SmokeParticle(xIn, yIn, normalIn) {
     this.x = xIn;
     this.y = yIn;
-    this.lifetime = (Math.random() * (4 - 0.5) + 0.5);
-    this.normal = normalIn;
-    this.size = 1;
-    this.rotation = 0;
+    this.lifetime = (Math.random() * (15 - 2) + 2);
+    this.age = 0;
+    this.normal = normalIn;    
+    this.maxSize = Math.ceil(Math.random() * 40);    
+    this.rotation = Math.random() * Math.PI * 2;
+    this.rotationSpeed = ((Math.random() * 2) - 1) * 0.8;
+    this.size = this.maxSize;
     this.dead = false;
+    this.speedX = ((Math.random() * 2) - 1) * 140;
+    this.speedY = ((Math.random() * 2) - 1) * 140;
+
 }
 SmokeParticle.prototype.MakeMove = function () {
     if (!this.dead) {
+        this.age += 1 / framerate;
 
+        this.rotation += this.rotationSpeed / framerate;
+        this.size = Math.floor((1 - Math.pow(this.age / this.lifetime, 2)) * this.maxSize);
+        if (this.size < 1) {
+            this.size = 1;
+        }
 
+        this.x += (this.speedX / framerate);
+        this.y += (this.speedY / framerate);
+        this.speedX *= (1 - (1 / framerate) * 2);
+        this.speedY *= (1 - (1 / framerate) * 2);
+
+        
+
+        this.age += 1 / framerate;
+        if (this.age > this.lifetime) {
+            this.dead = true;
+        }
+
+        const deleteZone = this.size;
+        if (this.x < -deleteZone || this.x > width + deleteZone || this.y < -deleteZone || this.y > height + deleteZone) {
+            this.dead = true;
+        }        
     }
-}
+};
 
 SmokeParticle.prototype.Render = function () {
     if (!this.dead) {
+        translate(this.x, height - this.y);
+        rotate(this.rotation);
+        image(cloudImage, -this.size / 2, -this.size / 2, this.size, this.size);
+        resetMatrix();
+    }
+};
 
+function DebrisParticle(xIn, yIn, normalIn) {
+    this.x = xIn;
+    this.y = yIn;
+    this.normal = normalIn;
+    this.maxSize = Math.ceil(Math.random() * 10);
+    this.rotation = Math.random() * Math.PI * 2;
+    this.rotationSpeed = ((Math.random() * 2) - 1) * 1.8;
+    this.size = this.maxSize;
+    this.dead = false;
+
+    var launchSpeed = Math.random() * 550;
+    this.velX = normalIn.x * launchSpeed;
+    this.velY = normalIn.y * launchSpeed;
+    var rotateAngle = (Math.random() * Math.PI) - (Math.PI/2);
+    var newVectors = rotateVectors(this.velX, this.velY, rotateAngle);
+    this.velX = newVectors.x;
+    this.velY = newVectors.y;    
+}
+
+function rotateVectors(xIn, yIn, thetaRad) {
+    cs = Math.cos(thetaRad);
+    sn = Math.sin(thetaRad);
+
+    var newX = xIn * cs - yIn * sn;
+    var newY = xIn * sn + yIn * cs;
+
+    return new Position(newX, newY);
+}
+
+
+DebrisParticle.prototype.MakeMove = function () {
+    if (!this.dead) {
+
+
+
+        this.x += this.velX / framerate;
+        this.y += this.velY / framerate;
+        this.velY += gravityUp;
+
+        const deleteZone = 10;
+        if (this.x < -deleteZone || this.x > width + deleteZone || this.y < -deleteZone || this.y > height + deleteZone) {
+            this.dead = true;
+        }
+        
+    }
+};
+
+DebrisParticle.prototype.Render = function () {
+    if (!this.dead) {
+        translate(this.x, height - this.y);
+        rotate(this.rotation);
+        image(cloudImage, -this.size / 2, -this.size / 2, this.size, this.size);
+        resetMatrix();
 
     }
-}
+};
