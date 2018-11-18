@@ -7,6 +7,7 @@ var mDownPrevious = false;
 var mouseVelX = 0;
 var mouseVely = 0;
 var cloudImage;
+var debrisImage;
 
 const mouseSmoothing = 5;
 const gravityUp = -8;
@@ -18,6 +19,7 @@ const nullNormal = new Position(0, 0);
 
 function preload() {
     cloudImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/CloudFaded.png");
+    debrisImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/Debris.png");
 }
 
 function setup() {
@@ -270,9 +272,9 @@ function DebrisParticle(xIn, yIn, normalIn) {
     this.x = xIn;
     this.y = yIn;
     this.normal = normalIn;
-    this.maxSize = Math.ceil(Math.random() * 10);
+    this.maxSize = Math.ceil(Math.random() * 7);
     this.rotation = Math.random() * Math.PI * 2;
-    this.rotationSpeed = ((Math.random() * 2) - 1) * 1.8;
+    this.rotationSpeed = ((Math.random() * 2) - 1) * 6;
     this.size = this.maxSize;
     this.dead = false;
 
@@ -299,7 +301,7 @@ function rotateVectors(xIn, yIn, thetaRad) {
 DebrisParticle.prototype.MakeMove = function () {
     if (!this.dead) {
 
-
+        this.rotation += this.rotationSpeed / framerate;
 
         this.x += this.velX / framerate;
         this.y += this.velY / framerate;
@@ -308,8 +310,7 @@ DebrisParticle.prototype.MakeMove = function () {
         const deleteZone = 10;
         if (this.x < -deleteZone || this.x > width + deleteZone || this.y < -deleteZone || this.y > height + deleteZone) {
             this.dead = true;
-        }
-        
+        }        
     }
 };
 
@@ -317,8 +318,7 @@ DebrisParticle.prototype.Render = function () {
     if (!this.dead) {
         translate(this.x, height - this.y);
         rotate(this.rotation);
-        image(cloudImage, -this.size / 2, -this.size / 2, this.size, this.size);
+        image(debrisImage, -this.size / 2, -this.size / 2, this.size, this.size);
         resetMatrix();
-
     }
 };
