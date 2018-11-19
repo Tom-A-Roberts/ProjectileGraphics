@@ -137,8 +137,8 @@ function DeleteProjectile(index) {
         particles.push(new DebrisParticle(deleted[0].x, deleted[0].y, deleted[0].deadNormal));
     }
 
-    offsetX = ((Math.random() - 0.5) * 2) * 5;
-    offsetY = ((Math.random() - 0.5) * 2) * 5;
+    //offsetX = ((Math.random() - 0.5) * 2) * 5;
+    //offsetY = ((Math.random() - 0.5) * 2) * 5;
 
 
     
