@@ -111,8 +111,8 @@ function draw() {
         mousePositions = new Array(0);
         mDownPrevious = false;
     }
-
-DrawBorders();
+    //UpdateOffset();
+    DrawBorders();
 }
 
 
@@ -133,10 +133,14 @@ function DeleteProjectile(index) {
     for (var i = 0; i < 25; i++) {
         particles.push(new SmokeParticle(deleted[0].x, deleted[0].y, deleted[0].deadNormal));
     }
-    for (var i = 0; i < 7; i++) {
+    for (i = 0; i < 7; i++) {
         particles.push(new DebrisParticle(deleted[0].x, deleted[0].y, deleted[0].deadNormal));
     }
-    
+
+    offsetX = ((Math.random() - 0.5) * 2) * 5;
+    offsetY = ((Math.random() - 0.5) * 2) * 5;
+
+
     
   
 }
@@ -374,9 +378,6 @@ DebrisParticle.prototype.Render = function () {
     }
 };
 
-
-
-
 function GetRawPositionX(xIn) {
     return xIn + leftPadding + offsetX;
 }
@@ -392,7 +393,22 @@ function GetPositionFromRawY(yIn) {
 }
 
 function UpdateOffset() {
-    offsetX *= 0.9;
-    offsetY *= 0.9;
+    const maxOffset = 5;
+    var dist = GetDistance(offsetX, offsetY);
+    if (dist > maxOffset) {
+        offsetX /= dist;
+        offsetY /= dist;
+        offsetX *= maxOffset;
+        offsetY *= maxOffset;
+    }
 
+    const damping = 2;
+    offsetX *= (1 - (1 / frameRate) * damping);
+    offsetY *= (1 - (1 / frameRate) * damping);
 }
+
+function GetDistance(xIn, yIn) {
+    return Math.sqrt(xIn ^ xIn + yIn * yIn);
+}
+
+
