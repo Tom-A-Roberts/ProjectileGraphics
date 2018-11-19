@@ -8,11 +8,12 @@ var mouseVelX = 0;
 var mouseVely = 0;
 var cloudImage;
 var debrisImage;
+var shellImage;
 
 const mouseSmoothing = 5;
 const gravityUp = -8;
 const gravityDown = -16;
-const framerate = 60;
+var framerate = 60;
 const width = 800;
 const height = 600;
 const nullNormal = new Position(0, 0);
@@ -20,11 +21,14 @@ const nullNormal = new Position(0, 0);
 function preload() {
     cloudImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/CloudFaded.png");
     debrisImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/Debris.png");
+    shellImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/Shell.png");
+    
 }
 
 function setup() {
     var canvas = createCanvas(width, height);
     frameRate(framerate);
+    //framerate *= 0.8;
     canvas.parent("holder");
     background(200, 200, 200);
     cursor(CROSS);
@@ -136,13 +140,14 @@ function Position(xIn, yIn) {
 }
 
 function Projectile(xIn, yIn, xVelIn, yVelIn) {
-    this.radius = 10;
+    this.radius = 15;
     this.x = xIn;
     this.y = yIn;
     this.xVel = xVelIn;
     this.yVel = yVelIn;
     this.direction = 0;
     this.deadNormal = nullNormal;
+
 }
 Projectile.prototype.MakeMove = function () {
     if (this.deadNormal === nullNormal) {
@@ -155,6 +160,9 @@ Projectile.prototype.MakeMove = function () {
         }
         this.yVel += currentGravity * 1 / framerate;
         //                READABILITY ^ you nonce
+
+        this.direction = rotationFromVectors(this.xVel, this.yVel);
+
 
         if (this.x < 0) { 
             this.deadNormal = new Position(1, 0);
@@ -177,7 +185,22 @@ Projectile.prototype.MakeMove = function () {
 Projectile.prototype.Render = function () {
 
     ellipse(this.x, height - this.y, 5, 5);
+
+    translate(this.x, height - this.y);
+    rotate(-this.direction);
+    image(shellImage, -this.radius / 2, -this.radius / 2, this.radius, this.radius);
+    resetMatrix();
 };
+
+function rotationFromVectors(xIn, yIn) {
+    var directionOut = Math.atan(Math.abs(yIn) / xIn);
+    if (xIn < 0)
+        directionOut = Math.PI + directionOut;
+    if (yIn < 0)
+        directionOut = - directionOut;
+    document.getElementById("debugText").textContent = "y: " + Math.abs(yIn) + " x: " + xIn + " direction: " + directionOut;
+    return directionOut;
+}
 
 function BangParticle(xIn, yIn, normalIn) {
     this.x = xIn;
