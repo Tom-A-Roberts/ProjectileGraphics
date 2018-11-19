@@ -10,12 +10,21 @@ var cloudImage;
 var debrisImage;
 var shellImage;
 
+var maxWidth;
+var maxHeight;
+
+var offsetX = 0;
+var offsetY = 0;
+
 const mouseSmoothing = 5;
 const gravityUp = -8;
 const gravityDown = -16;
 var framerate = 60;
 const width = 800;
 const height = 600;
+const leftPadding = 10;
+const upperPadding = 10;
+
 const nullNormal = new Position(0, 0);
 
 function preload() {
@@ -26,13 +35,16 @@ function preload() {
 }
 
 function setup() {
-    var canvas = createCanvas(width, height);
+    maxWidth = width + leftPadding*2;
+    maxHeight = height + upperPadding*2;
+    var canvas = createCanvas(maxWidth, maxHeight);
     frameRate(framerate);
+    //framerate *= 2;
     //framerate *= 0.8;
     canvas.parent("holder");
     background(200, 200, 200);
     cursor(CROSS);
-    
+
 }
 
 function draw() {
@@ -51,6 +63,7 @@ function draw() {
         else {
             DeleteProjectile(i);
             projectileCount -= 1;
+            
         }
     }
     var particleCount = particles.length;
@@ -67,16 +80,20 @@ function draw() {
         }
     }
 
-
+        newMouseX = GetPositionFromRawX(mouseX);
+        newMouseY = GetPositionFromRawY(mouseY);
     if (mouseIsPressed) {
         if (mDownPrevious === false) {
             //Mouse just clicked:
             mDownPrevious = true;
         }
         //Every frame the mouse is down:
-        var lastPoint = AddPosition(mouseX, mouseY);
-        var movementX = mouseX - lastPoint.x;
-        var movementY = mouseY - lastPoint.y;        
+
+
+
+        var lastPoint = AddPosition(newMouseX, newMouseY);
+        var movementX = newMouseX - lastPoint.x;
+        var movementY = newMouseY - lastPoint.y;        
         movementX /= mousePositions.length;
         movementY /= mousePositions.length;
         mouseVelX = movementX * 0.3;/// framerate;
@@ -89,13 +106,24 @@ function draw() {
         //Mouse just let go:
 
         if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
-            projectiles.push(new Projectile(mouseX, height - mouseY,mouseVelX,-mouseVely));
+            projectiles.push(new Projectile(newMouseX, newMouseY, mouseVelX, mouseVely));
         }
         mousePositions = new Array(0);
         mDownPrevious = false;
     }
 
+DrawBorders();
+}
 
+
+function DrawBorders() {
+    fill(35,35,35);
+    noStroke();
+    rect(0,0,leftPadding + offsetX, maxHeight);
+    rect(leftPadding + offsetX + width, 0, leftPadding - offsetX, maxHeight);
+    rect(leftPadding + offsetX, 0, width, upperPadding - offsetY);
+    rect(leftPadding + offsetX, upperPadding + height - offsetY, width, upperPadding + offsetY);
+    //rect(0, maxWidth,, maxHeight);
 }
 
 function DeleteProjectile(index) {
@@ -184,9 +212,9 @@ Projectile.prototype.MakeMove = function () {
 };
 Projectile.prototype.Render = function () {
 
-    ellipse(this.x, height - this.y, 5, 5);
+   // ellipse(this.x, height - this.y, 5, 5);
 
-    translate(this.x, height - this.y);
+    translate(GetRawPositionX(this.x), GetRawPositionY(this.y));
     rotate(-this.direction);
     image(shellImage, -this.radius / 2, -this.radius / 2, this.radius, this.radius);
     resetMatrix();
@@ -234,7 +262,7 @@ BangParticle.prototype.Render = function () {
         stroke(color(0,0,0,this.alpha*255));
         strokeWeight(this.thickness);
         noFill();
-        ellipse(Math.floor(this.x), height - Math.floor(this.y), this.radius, this.radius);        
+        ellipse(GetRawPositionX(this.x), GetRawPositionY(this.y), this.radius, this.radius);        
     }
 }
 
@@ -284,7 +312,7 @@ SmokeParticle.prototype.MakeMove = function () {
 
 SmokeParticle.prototype.Render = function () {
     if (!this.dead) {
-        translate(this.x, height - this.y);
+        translate(GetRawPositionX(this.x), GetRawPositionY(this.y));
         rotate(this.rotation);
         image(cloudImage, -this.size / 2, -this.size / 2, this.size, this.size);
         resetMatrix();
@@ -339,9 +367,32 @@ DebrisParticle.prototype.MakeMove = function () {
 
 DebrisParticle.prototype.Render = function () {
     if (!this.dead) {
-        translate(this.x, height - this.y);
+        translate(GetRawPositionX(this.x), GetRawPositionY(this.y));
         rotate(this.rotation);
         image(debrisImage, -this.size / 2, -this.size / 2, this.size, this.size);
         resetMatrix();
     }
 };
+
+
+
+
+function GetRawPositionX(xIn) {
+    return xIn + leftPadding + offsetX;
+}
+function GetRawPositionY(yIn) {
+    return height - (yIn - upperPadding + offsetY);
+}
+
+function GetPositionFromRawX(xIn) {
+    return xIn - leftPadding - offsetX;
+}
+function GetPositionFromRawY(yIn) {
+    return height - (yIn - upperPadding + offsetY);
+}
+
+function UpdateOffset() {
+    offsetX *= 0.9;
+    offsetY *= 0.9;
+
+}
