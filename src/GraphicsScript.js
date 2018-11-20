@@ -221,7 +221,7 @@ Projectile.prototype.MakeMove = function () {
         this.y = height;
         }
     }
-};
+}
 Projectile.prototype.Render = function () {
 
    // ellipse(this.x, height - this.y, 5, 5);
