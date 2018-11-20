@@ -1,5 +1,7 @@
 /// <reference path="p5.global-mode.d.ts"/>
 
+
+
 var projectiles = new Array(0);
 var mousePositions = new Array(0);
 var particles = new Array(0);
@@ -27,6 +29,7 @@ const width = 1100;
 const height = 700;
 const leftPadding = 15;
 const upperPadding = 15;
+//"airbnb-base"
 
 const nullNormal = new Position(0, 0);
 
@@ -35,7 +38,7 @@ function preload() {
     debrisImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Debris.png");
     shellImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Shell.png");
     backgroundImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/MountainBackground2.png");
-    }
+}
 
 function setup() {
     maxWidth = width + leftPadding*2;
@@ -84,8 +87,8 @@ function draw() {
         }
     }
 
-        newMouseX = GetPositionFromRawX(mouseX);
-        newMouseY = GetPositionFromRawY(mouseY);
+    var newMouseX = GetPositionFromRawX(mouseX);
+    var newMouseY = GetPositionFromRawY(mouseY);
     if (mouseIsPressed) {
         if (mDownPrevious === false) {
             //Mouse just clicked:
@@ -217,14 +220,15 @@ Projectile.prototype.MakeMove = function () {
             this.y = 0;
         }
         else if (this.y > height) {
-        this.deadNormal = new Position(0, -1);
-        this.y = height;
+            this.deadNormal = new Position(0, -1);
+            this.y = height;
         }
     }
-}
+};
+
 Projectile.prototype.Render = function () {
 
-   // ellipse(this.x, height - this.y, 5, 5);
+    // ellipse(this.x, height - this.y, 5, 5);
 
     translate(GetRawPositionX(this.x), GetRawPositionY(this.y));
     rotate(-this.direction);
@@ -268,7 +272,7 @@ BangParticle.prototype.MakeMove = function () {
             this.dead = true;
         }
     }
-}
+};
 BangParticle.prototype.Render = function () {
     if (!this.dead) {
         stroke(color(0,0,0,this.alpha*255));
@@ -276,7 +280,7 @@ BangParticle.prototype.Render = function () {
         noFill();
         ellipse(GetRawPositionX(this.x), GetRawPositionY(this.y), this.radius, this.radius);        
     }
-}
+};
 
 function SmokeParticle(xIn, yIn, normalIn) {
     this.x = xIn;
@@ -351,8 +355,8 @@ function DebrisParticle(xIn, yIn, normalIn) {
 }
 
 function rotateVectors(xIn, yIn, thetaRad) {
-    cs = Math.cos(thetaRad);
-    sn = Math.sin(thetaRad);
+    var cs = Math.cos(thetaRad);
+    var sn = Math.sin(thetaRad);
 
     var newX = xIn * cs - yIn * sn;
     var newY = xIn * sn + yIn * cs;
