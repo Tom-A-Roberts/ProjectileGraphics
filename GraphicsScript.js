@@ -22,8 +22,8 @@ const mouseSmoothing = 5;
 const gravityUp = -8;
 const gravityDown = -16;
 var framerate = 60;
-const width = 800;
-const height = 600;
+const width = 1100;
+const height = 700;
 const leftPadding = 10;
 const upperPadding = 10;
 
@@ -145,18 +145,14 @@ function DeleteProjectile(index) {
     var mometum = (GetDistance(deleted[0].xVel, deleted[0].yVel)^4) * 0.2;
 
     var dist = GetDistance(offsetX, offsetY);
-    //console.log(mometum);
     offsetX /= dist;
     offsetY /= dist;
     offsetX *= mometum;
     offsetY *= mometum;
-    //offsetX = ((Math.random() * 2) -1)* 5;
-    //offsetY = ((Math.random() * 2) - 1) * 5;
   
 }
 function DeleteParticle(index) {
     particles.splice(index, 1);
-    //console.log("Particle count = " + particles.length);
 }
 
 function AddPosition(xIn, yIn) {
@@ -216,7 +212,7 @@ Projectile.prototype.MakeMove = function () {
         }
         else if (this.y < 0) {
             this.deadNormal = new Position(0, 1);
-            this.y = 0
+            this.y = 0;
         }
         else if (this.y > height) {
         this.deadNormal = new Position(0, -1);
