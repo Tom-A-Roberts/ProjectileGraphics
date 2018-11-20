@@ -9,6 +9,7 @@ var mouseVely = 0;
 var cloudImage;
 var debrisImage;
 var shellImage;
+var backgroundImage;
 
 var maxWidth;
 var maxHeight;
@@ -24,8 +25,8 @@ const gravityDown = -16;
 var framerate = 60;
 const width = 1100;
 const height = 700;
-const leftPadding = 10;
-const upperPadding = 10;
+const leftPadding = 15;
+const upperPadding = 15;
 
 const nullNormal = new Position(0, 0);
 
@@ -33,6 +34,7 @@ function preload() {
     cloudImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/CloudFaded.png");
     debrisImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/Debris.png");
     shellImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/Shell.png");
+    backgroundImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/MountainBackground2.png");
     
 }
 
@@ -50,7 +52,8 @@ function setup() {
 }
 
 function draw() {
-    background(200, 200, 200);
+    background(220, 220, 220);
+    image(backgroundImage, (leftPadding/2) + offsetX, (upperPadding/2) - offsetY, width + leftPadding, height + upperPadding);
 
     noStroke();
     fill(0, 0, 0);
@@ -123,8 +126,8 @@ function DrawBorders() {
     noStroke();
     rect(0,0,leftPadding + offsetX, maxHeight);
     rect(leftPadding + offsetX + width, 0, leftPadding - offsetX, maxHeight);
-    rect(leftPadding + offsetX, 0, width, upperPadding - offsetY);
-    rect(leftPadding + offsetX, upperPadding + height - offsetY, width, upperPadding + offsetY);
+    rect(leftPadding + offsetX - 1, 0, width + 2, upperPadding - offsetY);
+    rect(leftPadding + offsetX - 1, upperPadding + height - offsetY, width + 2, upperPadding + offsetY);
     //rect(0, maxWidth,, maxHeight);
 }
 
@@ -178,7 +181,7 @@ function Position(xIn, yIn) {
 }
 
 function Projectile(xIn, yIn, xVelIn, yVelIn) {
-    this.radius = 15;
+    this.radius = 16;
     this.x = xIn;
     this.y = yIn;
     this.xVel = xVelIn;
