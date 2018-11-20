@@ -31,12 +31,11 @@ const upperPadding = 15;
 const nullNormal = new Position(0, 0);
 
 function preload() {
-    cloudImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/CloudFaded.png");
-    debrisImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/Debris.png");
-    shellImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/Shell.png");
-    backgroundImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/MountainBackground2.png");
-    
-}
+    cloudImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/CloudFaded.png");
+    debrisImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Debris.png");
+    shellImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Shell.png");
+    backgroundImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/MountainBackground2.png");
+    }
 
 function setup() {
     maxWidth = width + leftPadding*2;
