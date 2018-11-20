@@ -15,6 +15,8 @@ var maxHeight;
 
 var offsetX = 0;
 var offsetY = 0;
+var offsetVelX = 0;
+var offsetVelY = 0;
 
 const mouseSmoothing = 5;
 const gravityUp = -8;
@@ -111,7 +113,7 @@ function draw() {
         mousePositions = new Array(0);
         mDownPrevious = false;
     }
-    //UpdateOffset();
+    UpdateOffset();
     DrawBorders();
 }
 
@@ -137,11 +139,19 @@ function DeleteProjectile(index) {
         particles.push(new DebrisParticle(deleted[0].x, deleted[0].y, deleted[0].deadNormal));
     }
 
-    //offsetX = ((Math.random() - 0.5) * 2) * 5;
-    //offsetY = ((Math.random() - 0.5) * 2) * 5;
+    offsetX = deleted[0].x - (width / 2);
+    offsetY = deleted[0].y - (height / 2);
 
+    var mometum = (GetDistance(deleted[0].xVel, deleted[0].yVel)^4) * 0.2;
 
-    
+    var dist = GetDistance(offsetX, offsetY);
+    //console.log(mometum);
+    offsetX /= dist;
+    offsetY /= dist;
+    offsetX *= mometum;
+    offsetY *= mometum;
+    //offsetX = ((Math.random() * 2) -1)* 5;
+    //offsetY = ((Math.random() * 2) - 1) * 5;
   
 }
 function DeleteParticle(index) {
@@ -401,14 +411,21 @@ function UpdateOffset() {
         offsetX *= maxOffset;
         offsetY *= maxOffset;
     }
+    const springyness = 15;
+    const damping = 10;
 
-    const damping = 2;
-    offsetX *= (1 - (1 / frameRate) * damping);
-    offsetY *= (1 - (1 / frameRate) * damping);
+    offsetVelX += -offsetX * springyness;
+    offsetVelY += -offsetY * springyness;
+
+    offsetVelX *= 1 - ((1 / framerate) * damping);
+    offsetVelY *= 1 - ((1 / framerate) * damping);
+
+    offsetX += offsetVelX / framerate;//(1 - (1 / frameRate) * damping);
+    offsetY += offsetVelY / framerate;//(1 - (1 / frameRate) * damping);
 }
 
 function GetDistance(xIn, yIn) {
-    return Math.sqrt(xIn ^ xIn + yIn * yIn);
+    return Math.sqrt((xIn * xIn) + (yIn * yIn));
 }
 
 
