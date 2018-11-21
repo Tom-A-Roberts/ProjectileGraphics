@@ -11,6 +11,7 @@ var cloudImage;
 var debrisImage;
 var shellImage;
 var backgroundImage;
+var truckImage;
 
 var maxWidth;
 var maxHeight;
@@ -37,6 +38,7 @@ function preload() {
     debrisImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Debris.png");
     shellImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Shell.png");
     backgroundImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/MountainBackground2.png");
+    truckImage =  loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Armycar.png");
 }
 
 function setup() {
@@ -50,11 +52,13 @@ function setup() {
     background(200, 200, 200);
     cursor(CROSS);
 
+    particles.push(new Truck(50,50));
 }
 
 function draw() {
     background(220, 220, 220);
-    image(backgroundImage, (leftPadding / 2) + offsetX, (upperPadding / 2) - offsetY, width + leftPadding, height + upperPadding);
+    image(backgroundImage, (leftPadding / 2) + offsetX/2, (upperPadding / 2) - offsetY/2, width + leftPadding, height + upperPadding);
+    //image(backgroundImage, (leftPadding / 2) + offsetX, (upperPadding / 2) - offsetY, width + leftPadding, height + upperPadding);
 
     noStroke();
     fill(0, 0, 0);
@@ -182,7 +186,7 @@ function Position(xIn, yIn) {
 }
 
 function Projectile(xIn, yIn, xVelIn, yVelIn) {
-    this.radius = 16;
+    this.radius = 18;
     this.x = xIn;
     this.y = yIn;
     this.xVel = xVelIn;
@@ -429,5 +433,39 @@ function UpdateOffset() {
 function GetDistance(xIn, yIn) {
     return Math.sqrt((xIn * xIn) + (yIn * yIn));
 }
+
+
+function Truck(xIn, yIn){
+    this.x = xIn;
+    this.y = yIn;
+    this.xSpeed = -5;
+    this.aspectRatio = 418/642;
+    this.xSize = 50;
+    this.ySize = this.xSize * this.aspectRatio;
+    this.health = 100;
+    this.dead = false;    
+}
+
+
+Truck.prototype.MakeMove = function () {
+    if (!this.dead) {
+        this.x += this.xSpeed / framerate;
+        
+        if(this.health <= 0){
+            this.dead = true;
+        }
+    }
+};
+
+Truck.prototype.Render = function () {
+    if (!this.dead) {
+        translate(GetRawPositionX(this.x), GetRawPositionY(this.y));
+        //rotate(this.rotation);
+        image(truckImage, -this.xSize / 2, -this.ySize / 2, this.xSize, this.ySize);
+        resetMatrix();
+    }
+};
+
+
 
 
