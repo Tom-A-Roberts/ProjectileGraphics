@@ -1,6 +1,4 @@
 /// <reference path="p5.global-mode.d.ts"/>
-// Test comment
-
 
 var projectiles = new Array(0);
 var mousePositions = new Array(0);
@@ -54,7 +52,7 @@ function setup() {
 }
 
 function draw() {
-    background(220, 220, 220);
+    background(221, 221, 221);
     image(backgroundImage, (leftPadding / 2) + offsetX, (upperPadding / 2) - offsetY, width + leftPadding, height + upperPadding);
 
     noStroke();
