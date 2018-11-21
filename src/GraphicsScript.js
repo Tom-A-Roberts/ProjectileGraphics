@@ -7,7 +7,7 @@ var mousePositions = new Array(0);
 var particles = new Array(0);
 var mDownPrevious = false;
 var mouseVelX = 0;
-var mouseVely = 0;
+var mouseVelY = 0;
 var cloudImage;
 var debrisImage;
 var shellImage;
@@ -45,7 +45,7 @@ function setup() {
     maxHeight = height + upperPadding*2;
     var canvas = createCanvas(maxWidth, maxHeight);
     frameRate(framerate);
-    //framerate *= 2;
+    //framerate *= 0.12;
     //framerate *= 0.8;
     canvas.parent("holder");
     background(200, 200, 200);
@@ -55,13 +55,13 @@ function setup() {
 
 function draw() {
     background(220, 220, 220);
-    image(backgroundImage, (leftPadding/2) + offsetX, (upperPadding/2) - offsetY, width + leftPadding, height + upperPadding);
+    image(backgroundImage, (leftPadding / 2) + offsetX, (upperPadding / 2) - offsetY, width + leftPadding, height + upperPadding);
 
     noStroke();
     fill(0, 0, 0);
     var projectileCount = projectiles.length;
     var i = 0;
-    while (i < projectileCount){
+    while (i < projectileCount) {
         projectiles[i].MakeMove();
         projectiles[i].Render();
         if (projectiles[i].deadNormal === nullNormal) {
@@ -70,7 +70,7 @@ function draw() {
         else {
             DeleteProjectile(i);
             projectileCount -= 1;
-            
+
         }
     }
     var particleCount = particles.length;
@@ -100,11 +100,11 @@ function draw() {
 
         var lastPoint = AddPosition(newMouseX, newMouseY);
         var movementX = newMouseX - lastPoint.x;
-        var movementY = newMouseY - lastPoint.y;        
+        var movementY = newMouseY - lastPoint.y;
         movementX /= mousePositions.length;
         movementY /= mousePositions.length;
         mouseVelX = movementX * 0.3;/// framerate;
-        mouseVely = movementY * 0.3; /// framerate;
+        mouseVelY = movementY * 0.3; /// framerate;
 
         //ellipse(lastPoint.x, lastPoint.y, 2, 2);
 
@@ -113,7 +113,7 @@ function draw() {
         //Mouse just let go:
 
         if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
-            projectiles.push(new Projectile(newMouseX, newMouseY, mouseVelX, mouseVely));
+            projectiles.push(new Projectile(newMouseX, newMouseY, mouseVelX, mouseVelY));
         }
         mousePositions = new Array(0);
         mDownPrevious = false;
@@ -147,13 +147,13 @@ function DeleteProjectile(index) {
     offsetX = deleted[0].x - (width / 2);
     offsetY = deleted[0].y - (height / 2);
 
-    var mometum = (GetDistance(deleted[0].xVel, deleted[0].yVel)^4) * 0.2;
+    var momentum = (GetDistance(deleted[0].xVel, deleted[0].yVel)^4) * 0.2;
 
     var dist = GetDistance(offsetX, offsetY);
     offsetX /= dist;
     offsetY /= dist;
-    offsetX *= mometum;
-    offsetY *= mometum;
+    offsetX *= momentum;
+    offsetY *= momentum;
   
 }
 function DeleteParticle(index) {
@@ -348,10 +348,10 @@ function DebrisParticle(xIn, yIn, normalIn) {
     var launchSpeed = Math.random() * 550;
     this.velX = normalIn.x * launchSpeed;
     this.velY = normalIn.y * launchSpeed;
-    var rotateAngle = (Math.random() * Math.PI) - (Math.PI/2);
+    var rotateAngle = (Math.random() * Math.PI) - (Math.PI / 2);
     var newVectors = rotateVectors(this.velX, this.velY, rotateAngle);
     this.velX = newVectors.x;
-    this.velY = newVectors.y;    
+    this.velY = newVectors.y;
 }
 
 function rotateVectors(xIn, yIn, thetaRad) {
@@ -412,12 +412,13 @@ function UpdateOffset() {
         offsetY /= dist;
         offsetX *= maxOffset;
         offsetY *= maxOffset;
+        
     }
-    const springyness = 15;
+    const springiness = 15;
     const damping = 10;
 
-    offsetVelX += -offsetX * springyness;
-    offsetVelY += -offsetY * springyness;
+    offsetVelX += -offsetX * springiness;
+    offsetVelY += -offsetY * springiness;
 
     offsetVelX *= 1 - ((1 / framerate) * damping);
     offsetVelY *= 1 - ((1 / framerate) * damping);

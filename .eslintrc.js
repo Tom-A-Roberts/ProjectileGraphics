@@ -18,5 +18,6 @@ module.exports = {
         "no-console": "off",
         "linebreak-style": "off",
         "no-undef": "off",
+        "no-unused-vars": "off",
     }
 };
