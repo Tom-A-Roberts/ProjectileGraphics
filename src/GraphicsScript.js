@@ -12,6 +12,7 @@ var debrisImage;
 var shellImage;
 var backgroundImage;
 var truckImage;
+var destroyedTruckImage;
 
 var maxWidth;
 var maxHeight;
@@ -27,8 +28,9 @@ const gravityDown = -16;
 var framerate = 60;
 const width = 1100;
 const height = 700;
-const leftPadding = 15;
-const upperPadding = 15;
+const leftPadding = 20;
+const upperPadding = 20;
+const maxWobble = 15;
 //"airbnb-base"
 
 const nullNormal = new Position(0, 0);
@@ -39,6 +41,7 @@ function preload() {
     shellImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Shell.png");
     backgroundImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/MountainBackground2.png");
     truckImage =  loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/Armycar.png");
+    destroyedTruckImage = loadImage("https://raw.githubusercontent.com/ksqk34/ProjectileGraphics/master/src/Images/ArmycarDestroyed.png");
 }
 
 function setup() {
@@ -52,12 +55,12 @@ function setup() {
     background(200, 200, 200);
     cursor(CROSS);
 
-    particles.push(new Truck(50,50));
+    SpawnTruck();
 }
 
 function draw() {
     background(220, 220, 220);
-    image(backgroundImage, (leftPadding / 2) + offsetX/2, (upperPadding / 2) - offsetY/2, width + leftPadding, height + upperPadding);
+    image(backgroundImage, (leftPadding / 2) + offsetX/1.5, (upperPadding / 2) - offsetY/1.5, width + leftPadding, height + upperPadding);
     //image(backgroundImage, (leftPadding / 2) + offsetX, (upperPadding / 2) - offsetY, width + leftPadding, height + upperPadding);
 
     noStroke();
@@ -157,8 +160,32 @@ function DeleteProjectile(index) {
     offsetY /= dist;
     offsetX *= momentum;
     offsetY *= momentum;
-  
+    checkForHits(deleted[0].x, deleted[0].y);
 }
+
+function checkForHits(xIn, yIn){
+    for (var i = 0; i < particles.length; i++){
+        if(particles[i] instanceof Truck){
+            //console.log(GetDistance(xIn - particles[i].x, yIn - particles[i].y));
+            var dist = GetDistance(xIn - particles[i].x, yIn - particles[i].y);
+            //particles[i].health -= dist;
+            if (dist <= 100 && particles[i].dead == false){
+
+                const explosionHeight = (Math.random()*3)+1;
+                var targetX = xIn - particles[i].x;
+                var targetY = yIn - particles[i].y - 100;
+
+                targetX *= -explosionHeight / ((Math.random() * 0.5)+0.8);
+                targetY *= -explosionHeight;
+
+                particles[i].Destroy(targetX, targetY);
+            }
+        }
+    }
+
+}
+
+
 function DeleteParticle(index) {
     particles.splice(index, 1);
 }
@@ -245,7 +272,7 @@ function rotationFromVectors(xIn, yIn) {
         directionOut = Math.PI + directionOut;
     if (yIn < 0)
         directionOut = - directionOut;
-    document.getElementById("debugText").textContent = "y: " + Math.abs(yIn) + " x: " + xIn + " direction: " + directionOut;
+    //document.getElementById("debugText").textContent = "y: " + Math.abs(yIn) + " x: " + xIn + " direction: " + directionOut;
     return directionOut;
 }
 
@@ -408,13 +435,13 @@ function GetPositionFromRawY(yIn) {
 }
 
 function UpdateOffset() {
-    const maxOffset = 5;
+//    const maxOffset = 5;
     var dist = GetDistance(offsetX, offsetY);
-    if (dist > maxOffset) {
+    if (dist > maxWobble) {
         offsetX /= dist;
         offsetY /= dist;
-        offsetX *= maxOffset;
-        offsetY *= maxOffset;
+        offsetX *= maxWobble;
+        offsetY *= maxWobble;
         
     }
     const springiness = 15;
@@ -438,7 +465,7 @@ function GetDistance(xIn, yIn) {
 function Truck(xIn, yIn){
     this.x = xIn;
     this.y = yIn;
-    this.xSpeed = -5;
+    this.xSpeed = -55;
     this.aspectRatio = 418/642;
     this.xSize = 50;
     this.ySize = this.xSize * this.aspectRatio;
@@ -452,7 +479,11 @@ Truck.prototype.MakeMove = function () {
         this.x += this.xSpeed / framerate;
         
         if(this.health <= 0){
+            this.Destroy();
+        }
+        if(this.x < -this.xSize/2){
             this.dead = true;
+            
         }
     }
 };
@@ -466,6 +497,78 @@ Truck.prototype.Render = function () {
     }
 };
 
+Truck.prototype.Destroy = function (xVelIn, yVelIn){
+    var newDebris = new TruckDebris(this.x, this.y, 0,0);
+    newDebris.xVel = xVelIn;
+    newDebris.yVel = yVelIn;
+    particles.push(newDebris);
 
 
+    particles.push(new BangParticle(this.x, this.y, new Position(0,1)));
+
+    for (var i = 0; i < 5; i++) {
+        particles.push(new SmokeParticle(this.x, this.y, new Position(0,1)));
+    }
+    for (i = 0; i < 25; i++) {
+        particles.push(new DebrisParticle(this.x, this.y, new Position(0,1)));
+    }
+
+    this.dead = true;
+
+
+};
+
+function SpawnTruck(){
+    var err = false;
+    for (var i = 0; i < particles.length; i++){
+        if(particles[i] instanceof Truck){
+            if(particles[i].x > width - particles[i].xSize){
+                err = true;
+            }
+        }
+    }
+    if(!err){
+        var newTruck = new Truck(50,50);
+        newTruck.x = width + newTruck.xSize/2;
+        newTruck.y = newTruck.ySize/2;
+        particles.push(newTruck);
+    }
+}
+
+function TruckDebris(xIn, yIn, xVelIn, yVelIn){
+    this.x = xIn;
+    this.y = yIn;
+    this.xVel = xVelIn;
+    this.yVel = yVelIn;
+    this.aspectRatio = 418/642;
+    this.xSize = 50;
+    this.ySize = this.xSize * this.aspectRatio;
+    this.direction = 0;
+    this.spinSpeed = ((Math.random()*2)-1)*4;
+    this.dead = false;    
+}
+
+
+TruckDebris.prototype.MakeMove = function () {
+    if (!this.dead) {
+        this.x += this.xVel / framerate;
+        this.y += this.yVel / framerate;
+        this.yVel += gravityUp;
+
+        this.direction += this.spinSpeed / framerate;
+
+        if(this.y < -this.ySize/2){
+            this.dead = true;
+        }
+    }
+};
+
+TruckDebris.prototype.Render = function () {
+    if (!this.dead) {
+        translate(GetRawPositionX(this.x), GetRawPositionY(this.y));
+        rotate(this.direction);
+        image(destroyedTruckImage, -this.xSize / 2, -this.ySize / 2, this.xSize, this.ySize);
+        resetMatrix();
+    }
+};
 
